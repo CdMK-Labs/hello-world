@@ -21,6 +21,21 @@
       display: inline-block;
       animation: wave 1.2s ease-in-out infinite;
     }
+    .star {
+      position: fixed;
+      pointer-events: none;
+      animation: sparkle var(--duration) ease-in-out infinite;
+      animation-delay: var(--delay);
+      opacity: 0;
+    }
+    @keyframes sparkle {
+      0%   { opacity: 0; transform: scale(0.5) rotate(0deg); }
+      20%  { opacity: 1; transform: scale(1.2) rotate(72deg); }
+      40%  { opacity: 0.6; transform: scale(0.9) rotate(144deg); }
+      60%  { opacity: 1; transform: scale(1.3) rotate(216deg); }
+      80%  { opacity: 0.4; transform: scale(0.8) rotate(288deg); }
+      100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+    }
   </style>
 </head>
 <body style="background-color: #ADD8E6; color: #00008B;">
@@ -55,6 +70,26 @@
     return index;
   }
   wrapChars(document.body, 0);
+
+  (function() {
+    var starCount = 60;
+    var colors = ['#FFD700', '#FFFACD', '#FFFFFF', '#FFF8DC', '#87CEEB'];
+    for (var i = 0; i < starCount; i++) {
+      var star = document.createElement('div');
+      star.className = 'star';
+      var size = (Math.random() * 18 + 8) + 'px';
+      var color = colors[Math.floor(Math.random() * colors.length)];
+      star.style.setProperty('--duration', (Math.random() * 2.5 + 1.5) + 's');
+      star.style.setProperty('--delay', (Math.random() * 4) + 's');
+      star.style.left = (Math.random() * 100) + 'vw';
+      star.style.top = (Math.random() * 100) + 'vh';
+      star.style.fontSize = size;
+      star.style.color = color;
+      star.style.textShadow = '0 0 6px ' + color + ', 0 0 12px ' + color;
+      star.textContent = '★';
+      document.body.appendChild(star);
+    }
+  })();
 </script>
 </body>
 </html>
