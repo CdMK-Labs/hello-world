@@ -7,19 +7,54 @@
   <meta name="Generator" content="Cocoa HTML Writer">
   <meta name="CocoaVersion" content="2575.7">
   <style type="text/css">
-    p.p2 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px Arial; color: #535353; -webkit-text-stroke: #535353}
-    p.p3 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px Arial; -webkit-text-stroke: #000000}
-    p.p4 {margin: 0.0px 0.0px 12.0px 0.0px; font: 13.0px Menlo; -webkit-text-stroke: #000000}
+    p.p2 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px Arial; color: #00008B; -webkit-text-stroke: #00008B}
+    p.p3 {margin: 0.0px 0.0px 12.0px 0.0px; font: 12.0px Arial; -webkit-text-stroke: #00008B}
+    p.p4 {margin: 0.0px 0.0px 12.0px 0.0px; font: 13.0px Menlo; -webkit-text-stroke: #00008B}
     span.s1 {font-kerning: none}
     span.s2 {font: 12.0px Arial; font-kerning: none}
     span.s3 {font-kerning: none; background-color: #f1f1f1}
+    @keyframes wave {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .wave-char {
+      display: inline-block;
+      animation: wave 1.2s ease-in-out infinite;
+    }
   </style>
 </head>
-<body style="background-color: #90ee90; color: #4B0082;">
-<h1 style="margin: 0.0px 0.0px 3.0px 0.0px; font: 24.0px Arial; -webkit-text-stroke: #000000"><span class="s1"><b>Hello world</b></span></h1>
+<body style="background-color: #ADD8E6; color: #00008B;">
+<h1 style="margin: 0.0px 0.0px 3.0px 0.0px; font: 24.0px Arial; -webkit-text-stroke: #00008B"><span class="s1"><b>Hello world</b></span></h1>
 <p class="p2"><span class="s1">First deployment from <b>CdMK Labs</b>.</span></p>
 <p class="p3"><span class="s1">If you can see this page, GitHub Pages deployment is working.</span></p>
 <p class="p4"><span class="s2">Repo: </span><span class="s3">hello-world</span></p>
 <p class="p4"><span class="s3">Manual change</span></p>
+<script>
+  function wrapChars(node, index) {
+    if (node.nodeType === Node.TEXT_NODE) {
+      var chars = node.textContent.split('');
+      var frag = document.createDocumentFragment();
+      chars.forEach(function(ch) {
+        if (ch === ' ') {
+          frag.appendChild(document.createTextNode(' '));
+        } else {
+          var span = document.createElement('span');
+          span.className = 'wave-char';
+          span.style.animationDelay = (index * 0.07) + 's';
+          span.textContent = ch;
+          frag.appendChild(span);
+          index++;
+        }
+      });
+      node.parentNode.replaceChild(frag, node);
+    } else if (node.nodeType === Node.ELEMENT_NODE && node.tagName !== 'SCRIPT' && node.tagName !== 'STYLE') {
+      Array.from(node.childNodes).forEach(function(child) {
+        index = wrapChars(child, index);
+      });
+    }
+    return index;
+  }
+  wrapChars(document.body, 0);
+</script>
 </body>
 </html>
