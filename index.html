@@ -27,17 +27,17 @@
     .star {
       position: fixed;
       pointer-events: none;
-      animation: sparkle var(--duration) ease-in-out infinite;
-      animation-delay: var(--delay);
       opacity: 0;
+      transition: left 2s ease-in-out, top 2s ease-in-out, opacity 0.8s ease-in-out;
     }
-    @keyframes sparkle {
-      0%   { opacity: 0; transform: scale(0.5) rotate(0deg); }
-      20%  { opacity: 1; transform: scale(1.2) rotate(72deg); }
-      40%  { opacity: 0.6; transform: scale(0.9) rotate(144deg); }
-      60%  { opacity: 1; transform: scale(1.3) rotate(216deg); }
-      80%  { opacity: 0.4; transform: scale(0.8) rotate(288deg); }
-      100% { opacity: 0; transform: scale(0.5) rotate(360deg); }
+    .star.visible {
+      opacity: 1;
+      animation: pulse 1.5s ease-in-out infinite;
+      animation-delay: var(--pulse-delay, 0s);
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 0.8; }
+      50% { transform: scale(1.4); opacity: 1; }
     }
   </style>
 </head>
@@ -77,21 +77,118 @@
   (function() {
     var starCount = 60;
     var colors = ['#FFD700', '#FFFACD', '#FFFFFF', '#FFF8DC', '#87CEEB'];
+    var stars = [];
+
     for (var i = 0; i < starCount; i++) {
       var star = document.createElement('div');
       star.className = 'star';
       var size = (Math.random() * 18 + 8) + 'px';
       var color = colors[Math.floor(Math.random() * colors.length)];
-      star.style.setProperty('--duration', (Math.random() * 2.5 + 1.5) + 's');
-      star.style.setProperty('--delay', (Math.random() * 4) + 's');
       star.style.left = (Math.random() * 100) + 'vw';
       star.style.top = (Math.random() * 100) + 'vh';
       star.style.fontSize = size;
       star.style.color = color;
       star.style.textShadow = '0 0 6px ' + color + ', 0 0 12px ' + color;
-      star.textContent = '★';
+      star.textContent = '\u2605';
+      star.style.setProperty('--pulse-delay', (i * 0.05) + 's');
       document.body.appendChild(star);
+      stars.push(star);
     }
+
+    var cx = window.innerWidth / 2;
+    var cy = window.innerHeight / 2;
+    var radius = Math.min(cx, cy) * 0.6;
+
+    function polygon(n, count) {
+      var pts = [];
+      for (var i = 0; i < count; i++) {
+        var side = i % n;
+        var t = (i % Math.ceil(count / n)) / Math.ceil(count / n);
+        var a1 = (side / n) * Math.PI * 2 - Math.PI / 2;
+        var a2 = ((side + 1) / n) * Math.PI * 2 - Math.PI / 2;
+        pts.push({
+          x: cx + radius * (Math.cos(a1) * (1 - t) + Math.cos(a2) * t),
+          y: cy + radius * (Math.sin(a1) * (1 - t) + Math.sin(a2) * t)
+        });
+      }
+      return pts;
+    }
+
+    function circle(count) {
+      var pts = [];
+      for (var i = 0; i < count; i++) {
+        var a = (i / count) * Math.PI * 2 - Math.PI / 2;
+        pts.push({ x: cx + radius * Math.cos(a), y: cy + radius * Math.sin(a) });
+      }
+      return pts;
+    }
+
+    function spiral(count) {
+      var pts = [];
+      for (var i = 0; i < count; i++) {
+        var t = i / count;
+        var a = t * Math.PI * 6;
+        var r = radius * t;
+        pts.push({ x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) });
+      }
+      return pts;
+    }
+
+    function grid(count) {
+      var side = Math.ceil(Math.sqrt(count));
+      var spacing = (radius * 2) / (side - 1 || 1);
+      var pts = [];
+      for (var i = 0; i < count; i++) {
+        var row = Math.floor(i / side);
+        var col = i % side;
+        pts.push({ x: cx - radius + col * spacing, y: cy - radius + row * spacing });
+      }
+      return pts;
+    }
+
+    function scatter(count) {
+      var pts = [];
+      for (var i = 0; i < count; i++) {
+        pts.push({ x: Math.random() * window.innerWidth, y: Math.random() * window.innerHeight });
+      }
+      return pts;
+    }
+
+    var shapes = [
+      function() { return circle(starCount); },
+      function() { return polygon(3, starCount); },
+      function() { return polygon(4, starCount); },
+      function() { return polygon(5, starCount); },
+      function() { return polygon(6, starCount); },
+      function() { return spiral(starCount); },
+      function() { return grid(starCount); },
+      function() { return scatter(starCount); }
+    ];
+
+    var shapeIndex = 0;
+
+    function moveToShape() {
+      var pts = shapes[shapeIndex]();
+      for (var i = 0; i < stars.length; i++) {
+        stars[i].style.left = pts[i].x + 'px';
+        stars[i].style.top = pts[i].y + 'px';
+      }
+      setTimeout(function() {
+        for (var i = 0; i < stars.length; i++) {
+          stars[i].classList.add('visible');
+        }
+      }, 100);
+      shapeIndex = (shapeIndex + 1) % shapes.length;
+    }
+
+    setTimeout(function() { moveToShape(); }, 500);
+    setInterval(moveToShape, 3500);
+
+    window.addEventListener('resize', function() {
+      cx = window.innerWidth / 2;
+      cy = window.innerHeight / 2;
+      radius = Math.min(cx, cy) * 0.6;
+    });
   })();
 </script>
 </body>
